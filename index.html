@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vega-Lite Assignment Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  </head>
+  <body>
+    <div id="vis"></div>
+    <script>
+      const spec = {
+        "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "data": {
+          "url": "https://raw.githubusercontent.com/sohan2503001/SNA/refs/heads/main/HW_III(csv).csv",
+          "format": {
+            "type": "csv",
+            "parse": {
+              "OrderDate": "date:'%Y-%m-%d'",
+              "Units": "number",
+              "Unit Cost": "number",
+              "Total": "number"
+            }
+          }
+        },
+        "vconcat": [
+          {
+            "hconcat": [
+              {
+                "width": 250,
+                "height": 200,
+                "title": "Total Sales by Representative (Donut Chart)",
+                "mark": { "type": "arc", "innerRadius": 50 },
+                "encoding": {
+                  "theta": {
+                    "field": "Total",
+                    "type": "quantitative",
+                    "aggregate": "sum",
+                    "title": "Total Sales ($)"
+                  },
+                  "color": {
+                    "field": "Rep",
+                    "type": "nominal",
+                    "legend": { "title": "Representative" }
+                  },
+                  "tooltip": [
+                    { "field": "Rep", "type": "nominal" },
+                    { "field": "Total", "type": "quantitative", "aggregate": "sum", "format": ".2f" }
+                  ]
+                }
+              },
+              {
+                "width": 250,
+                "height": 200,
+                "title": "Correlation of Units Sold and Unit Cost with Item Brush (Scatter Plot)",
+                "params": [
+                  { "name": "brush", "select": { "type": "interval" } }
+                ],
+                "mark": { "type": "point", "size": 50 },
+                "encoding": {
+                  "x": {
+                    "field": "Units",
+                    "type": "quantitative",
+                    "title": "Units Sold"
+                  },
+                  "y": {
+                    "field": "Unit Cost",
+                    "type": "quantitative",
+                    "title": "Unit Cost ($)",
+                    "scale": { "type": "log" }
+                  },
+                  "color": {
+                    "condition": {
+                      "param": "brush",
+                      "field": "Item",
+                      "type": "nominal",
+                      "legend": { "title": "Item" }
+                    },
+                    "value": "grey"
+                  },
+                  "tooltip": [
+                    { "field": "Item", "type": "nominal" },
+                    { "field": "Units", "type": "quantitative" },
+                    { "field": "Unit Cost", "type": "quantitative", "format": ".2f" }
+                  ]
+                }
+              },
+              {
+                "width": 250,
+                "height": 200,
+                "title": "Total Sales Over Time by Item (Streamgraph)",
+                "mark": { "type": "area", "interpolate": "monotone" },
+                "encoding": {
+                  "x": {
+                    "field": "OrderDate",
+                    "type": "temporal",
+                    "title": "Order Date"
+                  },
+                  "y": {
+                    "field": "Total",
+                    "type": "quantitative",
+                    "aggregate": "sum",
+                    "stack": "center",
+                    "title": "Total Sales ($)"
+                  },
+                  "color": {
+                    "field": "Item",
+                    "type": "nominal",
+                    "legend": { "title": "Item" }
+                  },
+                  "tooltip": [
+                    { "field": "Item", "type": "nominal" },
+                    { "field": "Total", "type": "quantitative", "aggregate": "sum", "format": ".2f" },
+                    { "field": "OrderDate", "type": "temporal", "format": "%b %Y" }
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "hconcat": [
+              {
+                "width": 250,
+                "height": 200,
+                "title": "Distribution of Units Sold with Mean Overlay (Histogram)",
+                "layer": [
+                  {
+                    "mark": { "type": "bar" },
+                    "encoding": {
+                      "x": {
+                        "field": "Units",
+                        "bin": { "maxbins": 10 },
+                        "type": "quantitative",
+                        "title": "Units Sold"
+                      },
+                      "y": {
+                        "aggregate": "count",
+                        "type": "quantitative",
+                        "title": "Count"
+                      }
+                    }
+                  },
+                  {
+                    "mark": { "type": "rule", "color": "red", "size": 2 },
+                    "encoding": {
+                      "x": {
+                        "field": "Units",
+                        "aggregate": "mean",
+                        "type": "quantitative"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "width": 250,
+                "height": 200,
+                "title": "Total Sales by Representative (Bar Chart)",
+                "mark": "bar",
+                "encoding": {
+                  "x": {
+                    "field": "Rep",
+                    "type": "nominal",
+                    "title": "Representative",
+                    "sort": "-y"
+                  },
+                  "y": {
+                    "field": "Total",
+                    "type": "quantitative",
+                    "aggregate": "sum",
+                    "title": "Total Sales ($)"
+                  },
+                  "color": {
+                    "field": "Rep",
+                    "type": "nominal",
+                    "legend": null
+                  },
+                  "tooltip": [
+                    { "field": "Rep", "type": "nominal" },
+                    { "field": "Total", "type": "quantitative", "aggregate": "sum", "format": ".2f" }
+                  ]
+                }
+              },
+              {
+                "width": 250,
+                "height": 200,
+                "title": "Units Sold Over Time by Item (Line Chart)",
+                "mark": { "type": "line", "point": true },
+                "encoding": {
+                  "x": {
+                    "field": "OrderDate",
+                    "type": "temporal",
+                    "title": "Order Date"
+                  },
+                  "y": {
+                    "field": "Units",
+                    "type": "quantitative",
+                    "aggregate": "sum",
+                    "title": "Units Sold"
+                  },
+                  "color": {
+                    "field": "Item",
+                    "type": "nominal",
+                    "legend": { "title": "Item" }
+                  },
+                  "tooltip": [
+                    { "field": "Item", "type": "nominal" },
+                    { "field": "Units", "type": "quantitative", "aggregate": "sum" },
+                    { "field": "OrderDate", "type": "temporal", "format": "%b %Y" }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      };
+      vegaEmbed('#vis', spec);
+    </script>
+  </body>
+</html>
